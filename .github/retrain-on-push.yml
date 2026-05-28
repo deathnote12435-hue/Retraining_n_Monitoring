@@ -1,0 +1,82 @@
+name: MLOps Auto-Retraining and Monitoring Pipeline
+
+on:
+  push:
+    paths:
+      - 'data/new_data.csv'   # Automatically run when Tyler pushes fresh dataset entries
+  workflow_dispatch:         # From Week 7 Guide: Allows manual test triggers via GitHub UI
+
+jobs:
+  retrain-and-monitor:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Codebase
+      uses: actions/checkout@v4
+
+    - name: Setup Project Python Runtime
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+
+    # Optimization from Week 7 Guide: Caches libraries to save time on runner setups
+    - name: Cache Pip Dependencies
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+
+    # Installs the precise package stack detailed in the task criteria
+    - name: Install System Dependencies
+      run: |
+        pip install --upgrade pip
+        pip install dvc pandas numpy tensorflow scikit-learn joblib scipy
+
+    - name: Configure DVC Remote Connection
+      env:
+        DAGSHUB_USERNAME: ${{ secrets.DAGSHUB_USERNAME }}
+        DAGSHUB_TOKEN: ${{ secrets.DAGSHUB_TOKEN }}
+        REPO_OWNER: ${{ secrets.REPO_OWNER }}
+        REPO_NAME: ${{ secrets.REPO_NAME }}
+      run: |
+        dvc remote add -d origin https://dagshub.com/Theja-Amarasiri/applied-project-cl03_g06.dvc --force
+        dvc remote modify origin --local auth basic
+        dvc remote modify origin --local user $DAGSHUB_USERNAME
+        dvc remote modify origin --local password $DAGSHUB_TOKEN
+
+    - name: Pull Tracking Artifacts from DagsHub Registry
+      run: dvc pull
+
+    - name: Run Data Preprocessing (Tyler)
+      run: python src/preprocess_new_data.py
+
+    - name: Execute Statistical Ingestion Check (TJ)
+      id: monitoring_step
+      run: python src/monitor.py
+
+    - name: Conditional Model Pipeline Retraining
+      if: steps.monitoring_step.outputs.retrain_status == 'true'
+      run: |
+        echo "Statistical limits breached. Re-executing pipeline training sequence..."
+        dvc repro
+        
+        echo "Pushing updated weights and datasets to central storage..."
+        dvc push
+        
+        echo "Pushing tracking hash updates back to GitHub main branch..."
+        git config --global user.name "TJ-MLOps-Bot"
+        git config --global user.email "mlops-bot@swinburne.edu.au"
+        git add artifacts/metadata/ artifacts/metrics/ monitoring/reports/
+        git commit -m "Automated Pipeline Run: Retraining triggered due to Ingestion Data Drift [skip ci]"
+        git push origin main
+
+    # Delivers instantly viewable assets directly to GitHub Actions panel
+    - name: Deliver Monitoring Reports to Action UI Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: pipeline-monitoring-outputs
+        path: |
+          monitoring/reports/drift_report.json
+          artifacts/metrics/monitoring_metrics.json
