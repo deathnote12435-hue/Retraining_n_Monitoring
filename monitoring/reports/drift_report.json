@@ -1,0 +1,28 @@
+{
+    "summary": {
+        "system_status": "CRITICAL",
+        "retrain_recommended": true
+    },
+    "feature_level_metrics": {
+        "feature_0": {
+            "ks_statistic": 0.2,
+            "p_value": 1.0,
+            "drift_detected": false
+        },
+        "feature_1": {
+            "ks_statistic": 0.2,
+            "p_value": 1.0,
+            "drift_detected": false
+        },
+        "feature_2": {
+            "ks_statistic": 0.2,
+            "p_value": 1.0,
+            "drift_detected": false
+        },
+        "feature_3": {
+            "ks_statistic": 1.0,
+            "p_value": 0.007936507936507936,
+            "drift_detected": true
+        }
+    }
+}
