@@ -59,11 +59,9 @@ jobs:
     - name: Conditional Model Pipeline Retraining
       if: steps.monitoring_step.outputs.retrain_status == 'true'
       run: |
-        echo "Statistical limits breached. Re-executing pipeline training sequence..."
-        dvc repro
-        
-        echo "Pushing updated weights and datasets to central storage..."
-        dvc push
+      # uncomment once the training steps are in (IMPORTANT!!!!!!!!!!!!!!)
+        # dvc repro
+        # dvc push
         
         echo "Pushing tracking hash updates back to GitHub main branch..."
         git config --global user.name "TJ-MLOps-Bot"
