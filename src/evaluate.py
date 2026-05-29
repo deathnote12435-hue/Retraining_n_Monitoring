@@ -1,3 +1,7 @@
+"""
+This is an old version of evaluate.py and is no longer in use.
+It is being saved as a reference only 
+
 import pandas as pd 
 import numpy as np
 import json 
@@ -121,4 +125,5 @@ print(f"F1 Score: {f1:.4f}")
 print("\nConfusion Matrix:\n", conf_matrix)
 
 print("\nSaved to artifacts/metrics/evaluation_full.json")
+"""
 
