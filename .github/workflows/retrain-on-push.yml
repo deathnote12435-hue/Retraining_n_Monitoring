@@ -43,8 +43,8 @@ jobs:
       run: |
         dvc remote add -d origin https://dagshub.com/Theja-Amarasiri/applied-project-cl03_g06.dvc --force
         dvc remote modify origin --local auth basic
-        dvc remote modify origin --local user $DAGSHUB_USERNAME
-        dvc remote modify origin --local password $DAGSHUB_TOKEN
+        dvc remote modify origin --local user "${{ secrets.DAGSHUB_USERNAME }}"
+        dvc remote modify origin --local password "${{ secrets.DAGSHUB_TOKEN }}"
 
     - name: Pull Tracking Artifacts from DagsHub Registry
       run: dvc pull
