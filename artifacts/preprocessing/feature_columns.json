@@ -1,1 +1,21 @@
-
+{
+    "feature_order": [
+        "Gender",
+        "Age",
+        "Height",
+        "Weight",
+        "family_history_with_overweight",
+        "FAVC",
+        "FCVC",
+        "NCP",
+        "CAEC",
+        "SMOKE",
+        "CH2O",
+        "SCC",
+        "FAF",
+        "TUE",
+        "CALC",
+        "MTRANS"
+    ],
+    "note": "This is the correct feature order from ObesityDataSet_raw_and_data_sinthetic.csv before preprocessing."
+}
