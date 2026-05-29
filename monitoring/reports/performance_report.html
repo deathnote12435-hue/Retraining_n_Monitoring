@@ -1,1 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Model Performance Report</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+            background: #f7f7f7;
+        }
+        h1 {
+            color: #333;
+            border-bottom: 3px solid #4CAF50;
+            padding-bottom: 10px;
+        }
+        .metric-box {
+            background: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+        table {
+            width: 50%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        table, th, td {
+            border: 1px solid #bbb;
+        }
+        th, td {
+            padding: 10px;
+            text-align: center;
+        }
+        .timestamp {
+            font-size: 0.9em;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Model Performance Report</h1>
+
+<div class="metric-box">
+    <h2>Evaluation Summary</h2>
+    <p class="timestamp">Generated on: <span id="timestamp"></span></p>
+
+    <p><strong>Accuracy:</strong> <span id="accuracy"></span></p>
+    <p><strong>Precision:</strong> <span id="precision"></span></p>
+    <p><strong>Recall:</strong> <span id="recall"></span></p>
+    <p><strong>F1 Score:</strong> <span id="f1"></span></p>
+    <p><strong>ROC-AUC:</strong> <span id="rocauc"></span></p>
+</div>
+
+<div class="metric-box">
+    <h2>Confusion Matrix</h2>
+    <table id="confusion-matrix"></table>
+</div>
+
+<script>
+    fetch("../artifacts/metrics/evaluation_full.json")
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById("timestamp").textContent = data.timestamp;
+            document.getElementById("accuracy").textContent = data.accuracy.toFixed(4);
+            document.getElementById("precision").textContent = data.precision.toFixed(4);
+            document.getElementById("recall").textContent = data.recall.toFixed(4);
+            document.getElementById("f1").textContent = data.f1_score.toFixed(4);
+            document.getElementById("rocauc").textContent = data.roc_auc.toFixed(4);
+
+            const cmTable = document.getElementById("confusion-matrix");
+            data.confusion_matrix.forEach(row => {
+                const tr = document.createElement("tr");
+                row.forEach(cell => {
+                    const td = document.createElement("td");
+                    td.textContent = cell;
+                    tr.appendChild(td);
+                });
+                cmTable.appendChild(tr);
+            });
+        })
+        .catch(error => {
+            console.error("Error loading evaluation_full.json:", error);
+        });
+</script>
+
+</body>
+</html>
 
