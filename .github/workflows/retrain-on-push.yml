@@ -42,18 +42,22 @@ jobs:
         dvc remote modify origin --local user "${{ secrets.DAGSHUB_USERNAME }}"
         dvc remote modify origin --local password "${{ secrets.DAGSHUB_TOKEN }}"
 
-    - name: Pull Tracking Artifacts from DagsHub Registry
-      run: dvc pull || echo "No remote artifacts to pull yet"
+    - name: Build Baseline Data Arrays
+      run: |
+        python src/build_preprocessors.py
+        python src/build_numpy_data.py
 
     - name: Execute Statistical Ingestion Check (TJ)
       id: monitoring_step
-      run: python src/monitor.py
+      run: |
+        python src/monitor.py
 
     - name: Conditional Model Pipeline Retraining
       if: steps.monitoring_step.outputs.retrain_status == 'true'
       run: |
-        echo "Statistical limits breached. Re-executing pipeline training sequence..."
-        # Temporary placeholder until teammates integrate their training steps:
+        
+        rm -rf artifacts/data/*.npy
+        
         dvc repro
         dvc push
 
