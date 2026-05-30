@@ -1,0 +1,41 @@
+stages:
+  build_preprocessors:
+    cmd: python src/build_preprocessors.py
+    deps:
+      - src/build_preprocessors.py
+      - train/train.csv
+    outs:
+      - artifacts/preprocessing/scaler.pkl
+      - artifacts/preprocessing/encoder.pkl
+
+  build_numpy_data:
+    cmd: python src/build_numpy_data.py
+    deps:
+      - src/build_numpy_data.py
+      - train/train.csv
+      - test/test.csv
+      - artifacts/preprocessing/scaler.pkl
+      - artifacts/preprocessing/encoder.pkl
+    outs:
+      - artifacts/data/X_train.npy
+      - artifacts/data/y_train.npy
+      - artifacts/data/X_test.npy
+      - artifacts/data/y_test.npy
+
+  preprocess_new_incoming_data:
+    cmd: python src/preprocess_new_data.py
+    deps:
+      - src/preprocess_new_data.py
+      - data/new_data.csv
+      - artifacts/preprocessing/scaler.pkl
+    outs:
+      - artifacts/data/X_new.npy
+
+  train:
+    cmd: python src/model.py
+    deps:
+      - src/model.py
+      - artifacts/data/X_train.npy
+      - artifacts/data/y_train.npy
+    outs:
+      - artifacts/models/model.keras

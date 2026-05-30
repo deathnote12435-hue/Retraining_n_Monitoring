@@ -63,8 +63,8 @@ jobs:
       run: |
         echo "Statistical limits breached. Re-executing pipeline training sequence..."
         # Temporary placeholder until teammates integrate their training steps:
-        # dvc repro
-        # dvc push
+        dvc repro
+        dvc push
 
         git config --global user.name "TJ-MLOps-Bot"
         git config --global user.email "mlops-bot@swinburne.edu.au"
