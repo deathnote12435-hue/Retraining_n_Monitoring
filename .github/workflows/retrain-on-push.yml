@@ -45,15 +45,6 @@ jobs:
     - name: Pull Tracking Artifacts from DagsHub Registry
       run: dvc pull || echo "No remote artifacts to pull yet"
 
-    - name: Run Data Preprocessing (Tyler)
-      run: |
-        # Check if Tyler's script exists
-        if [ -f src/preprocess_new_data.py ]; then
-          python src/preprocess_new_data.py
-        else
-          echo "Tyler's preprocessing script not found, skipping step."
-        fi
-
     - name: Execute Statistical Ingestion Check (TJ)
       id: monitoring_step
       run: python src/monitor.py
