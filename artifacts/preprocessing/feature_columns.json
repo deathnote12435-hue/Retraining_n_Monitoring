@@ -17,5 +17,5 @@
         "CALC",
         "MTRANS"
     ],
-    "note": "This is the correct feature order from ObesityDataSet_raw_and_data_sinthetic.csv before preprocessing."
+    "note": "This is the correct feature order before preprocessing."
 }
