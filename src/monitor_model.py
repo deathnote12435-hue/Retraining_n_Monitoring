@@ -1,23 +1,24 @@
-import numpy as np
+import os
 import json
 import logging
-import subprocess
-from sklearn.metrics import accuracy_score, f1_score
-from tensorflow.keras.models import load_model
+import numpy as np
 from datetime import datetime
-import os
+from sklearn.metrics import accuracy_score, f1_score
+from tensorflow.keras.models import load_model, Sequential
+from tensorflow.keras.layers import Dense, Dropout
+from tensorflow.keras.callbacks import EarlyStopping
 from monitoring_rules import check_model_health
 
-# Logging setup
+# Logging Setup
 logging.basicConfig(
-    filename="artifacts/logs/monitoring_model.log",
+    filename='monitoring/logs/model_monitoring.log',
     level=logging.INFO,
-    format="%(asctime)s - %(levelname)s - %(message)s"
+    format='%(asctime)s - %(levelname)s - %(message)s'
 )
 
-logging.info("Starting MODEL-LEVEL monitoring pipeline...")
+logging.info("Initiating MODEL-LEVEL monitoring pipeline.")
 
-# Load artifacts
+# Load Artifacts
 try:
     X_test = np.load("artifacts/data/X_test.npy")
     y_test = np.load("artifacts/data/y_test.npy")
@@ -30,7 +31,7 @@ try:
 except Exception as e:
     logging.error(f"Error loading artifacts: {e}")
     raise e
-
+    
 # Prediction Drift
 try:
     y_pred_test = np.argmax(model.predict(X_test), axis=1)
@@ -55,11 +56,9 @@ except Exception as e:
     logging.error(f"Prediction drift error: {e}")
     raise e
 
-# Accuracy Drift
+# Accuracy and F1 Drift
 try:
     old_accuracy = accuracy_score(y_test, y_pred_test)
-
-    # Compute F1 for health checks
     old_f1 = f1_score(y_test, y_pred_test, average="weighted")
 
     if os.path.exists("artifacts/data/y_new.npy"):
@@ -75,8 +74,7 @@ try:
 except Exception as e:
     logging.error(f"Accuracy drift error: {e}")
     raise e
-
-# Model Health Check (using monitoring_rules.py)
+# Model Health Check
 current_metrics = {
     "accuracy": new_accuracy if new_accuracy is not None else old_accuracy,
     "f1_score": new_f1 if new_f1 is not None else old_f1
@@ -88,19 +86,54 @@ alerts = health["alerts"]
 
 logging.info(f"Model health: {is_healthy}, Alerts: {alerts}")
 
-# Determine retrain trigger
 retrain_triggered = not is_healthy
-
 logging.info(f"Retrain triggered: {retrain_triggered}")
 
-# Call retrain.py if needed
+# Retraining
+def build_model(input_dim, num_classes):
+    model = Sequential([
+        Dense(128, activation="relu", input_shape=(input_dim,)),
+        Dropout(0.3),
+        Dense(64, activation="relu"),
+        Dense(num_classes, activation="softmax")
+    ])
+    model.compile(optimizer="adam", loss="sparse_categorical_crossentropy", metrics=["accuracy"])
+    return model
+
 if retrain_triggered:
-    logging.info("Calling retrain.py...")
-    try:
-        subprocess.run(["python", "retrain.py"], check=True)
-        logging.info("Retrain script executed successfully.")
-    except Exception as e:
-        logging.error(f"Error calling retrain.py: {e}")
+    logging.info("Starting internal retraining...")
+
+    # Load full dataset
+    df = np.load("artifacts/data/X_train.npy")
+    y_train = np.load("artifacts/data/y_train.npy")
+
+    input_dim = df.shape[1]
+    num_classes = len(np.unique(y_train))
+
+    new_model = build_model(input_dim, num_classes)
+
+    early_stop = EarlyStopping(monitor="val_loss", patience=5, restore_best_weights=True)
+
+    new_model.fit(
+        df, y_train,
+        validation_split=0.2,
+        epochs=50,
+        batch_size=32,
+        callbacks=[early_stop],
+        verbose=0
+    )
+
+    # Evaluate new model
+    new_test_pred = np.argmax(new_model.predict(X_test), axis=1)
+    new_test_acc = accuracy_score(y_test, new_test_pred)
+    new_test_f1 = f1_score(y_test, new_test_pred, average="weighted")
+
+    # Compare
+    if new_test_acc > old_accuracy:
+        new_model.save("artifacts/models/model.keras")
+        logging.info("New model outperformed old model. Model replaced.")
+    else:
+        logging.info("New model did NOT outperform old model. Keeping existing model.")
 
 # Save monitoring_metrics.json
 monitoring_output = {
@@ -121,9 +154,12 @@ with open("artifacts/metrics/monitoring_metrics.json", "w") as f:
 
 logging.info("monitoring_metrics.json saved.")
 
-# Save drift_report.json
+# Save drift_report.json 
 drift_report = {
-    "timestamp": datetime.now().isoformat(),
+    "summary": {
+        "system_status": "CRITICAL" if retrain_triggered else "HEALTHY",
+        "retrain_recommended": retrain_triggered
+    },
     "prediction_drift": pred_drift,
     "accuracy_drift": {
         "old_accuracy": float(old_accuracy),
@@ -132,17 +168,21 @@ drift_report = {
     "f1_drift": {
         "old_f1": float(old_f1),
         "new_f1": float(new_f1) if new_f1 is not None else "N/A"
-    },
-    "model_health": health,
-    "retrain_recommended": retrain_triggered
+    }
 }
 
-with open("artifacts/metrics/drift_report.json", "w") as f:
+with open("monitoring/reports/drift_report.json", "w") as f:
     json.dump(drift_report, f, indent=4)
 
 logging.info("drift_report.json saved.")
 
-# Print summary
+# GitHub Actions Output Flag 
+if "GITHUB_OUTPUT" in os.environ:
+    with open(os.environ["GITHUB_OUTPUT"], "a") as go:
+        status_value = "true" if retrain_triggered else "false"
+        go.write(f"retrain_status={status_value}\n")
+
+# Console Summary
 print("\n MODEL-LEVEL MONITORING SUMMARY")
 print(f"Old Accuracy: {old_accuracy:.4f}")
 print(f"Old F1 Score: {old_f1:.4f}")
@@ -157,3 +197,6 @@ print("\nModel Health:", health)
 print(f"Retrain Recommended: {retrain_triggered}")
 
 print("\nMonitoring complete. Reports saved to artifacts/metrics/")
+
+
+
