@@ -7,7 +7,7 @@ from sklearn.preprocessing import StandardScaler, OneHotEncoder
 
 
 # Load training data
-df = pd.read_csv("train/train.csv")
+df = pd.read_csv("../train/train.csv")
 
 target_col = "NObeyesdad"  
 
