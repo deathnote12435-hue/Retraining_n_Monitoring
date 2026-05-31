@@ -3,7 +3,7 @@ name: MLOps Auto-Retraining and Monitoring Pipeline
 on:
   push:
     paths:
-      - 'data/new_data.csv'  
+      - 'data/new_data.csv'
   workflow_dispatch:
 
 jobs:
@@ -51,21 +51,53 @@ jobs:
       id: monitoring_step
       run: |
         python src/monitor.py
+        echo "retrain_status=true" >> $GITHUB_OUTPUT
+
+    - name: Send Email - Drift Detected
+      if: steps.monitoring_step.outputs.retrain_status == 'true'
+      uses: dawidd6/action-send-mail@v3
+      with:
+        server_address: ${{ secrets.SMTP_SERVER }}
+        server_port: ${{ secrets.SMTP_PORT }}
+        username: ${{ secrets.EMAIL_USERNAME }}
+        password: ${{ secrets.EMAIL_PASSWORD }}
+        subject: "Data Drift Detected — Retraining Triggered"
+        to: ${{ secrets.EMAIL_TO }}
+        from: "MLOps Bot <${{ secrets.EMAIL_USERNAME }}>"
+        body: |
+          Data drift has been detected in the ingestion pipeline.
+          Automated retraining has been triggered.
+          Repository: ${{ github.repository }}
+          Commit: ${{ github.sha }}
 
     - name: Conditional Model Pipeline Retraining
       if: steps.monitoring_step.outputs.retrain_status == 'true'
       run: |
-        
         rm -rf artifacts/data/*.npy
-        
         dvc repro
         dvc push
-
         git config --global user.name "TJ-MLOps-Bot"
         git config --global user.email "mlops-bot@swinburne.edu.au"
         git add artifacts/metadata/ artifacts/metrics/ monitoring/reports/ || echo "No changes to stage"
         git commit -m "Automated Pipeline Run: Retraining triggered due to Ingestion Data Drift [skip ci]" || echo "Nothing to commit"
         git push origin main || echo "Nothing to push"
+
+    - name: Send Email - Retraining Completed
+      if: steps.monitoring_step.outputs.retrain_status == 'true'
+      uses: dawidd6/action-send-mail@v3
+      with:
+        server_address: ${{ secrets.SMTP_SERVER }}
+        server_port: ${{ secrets.SMTP_PORT }}
+        username: ${{ secrets.EMAIL_USERNAME }}
+        password: ${{ secrets.EMAIL_PASSWORD }}
+        subject: "Model Retrained Successfully"
+        to: ${{ secrets.EMAIL_TO }}
+        from: "MLOps Bot <${{ secrets.EMAIL_USERNAME }}>"
+        body: |
+          Automated model retraining has completed successfully.
+          New model and metrics have been pushed to DVC.
+          Repository: ${{ github.repository }}
+          Commit: ${{ github.sha }}
 
     - name: Deliver Monitoring Reports to Action UI Artifacts
       uses: actions/upload-artifact@v4
@@ -74,3 +106,20 @@ jobs:
         path: |
           monitoring/reports/drift_report.json
           artifacts/metrics/monitoring_metrics.json
+
+    - name: Send Email - Pipeline Failed
+      if: failure()
+      uses: dawidd6/action-send-mail@v3
+      with:
+        server_address: ${{ secrets.SMTP_SERVER }}
+        server_port: ${{ secrets.SMTP_PORT }}
+        username: ${{ secrets.EMAIL_USERNAME }}
+        password: ${{ secrets.EMAIL_PASSWORD }}
+        subject: "MLOps Pipeline Failed"
+        to: ${{ secrets.EMAIL_TO }}
+        from: "MLOps Bot <${{ secrets.EMAIL_USERNAME }}>"
+        body: |
+          The MLOps pipeline encountered an error.
+          Please review the GitHub Actions logs.
+          Repository: ${{ github.repository }}
+          Commit: ${{ github.sha }}
