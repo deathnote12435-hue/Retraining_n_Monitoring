@@ -1,0 +1,19 @@
+cmd: python src/preprocess_new_data.py
+deps:
+- path: artifacts/preprocessing/scaler.pkl
+  hash: md5
+  md5: 73dc1fd11c16adf2700e582846437bc8
+  size: 1079
+- path: data/new_data.csv
+  hash: md5
+  md5: e27902c7b3bf843024d57e0432342448
+  size: 66730
+- path: src/preprocess_new_data.py
+  hash: md5
+  md5: 71cb1aa4f7d33458f20ad2a7596a55eb
+  size: 1212
+outs:
+- path: artifacts/data/X_new.npy
+  hash: md5
+  md5: 0729d5433914d722ad5011d944dd1bee
+  size: 125616
