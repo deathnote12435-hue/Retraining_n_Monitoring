@@ -7,7 +7,7 @@ from sklearn.preprocessing import StandardScaler, OneHotEncoder
 
 
 # Load training data
-df = pd.read_csv("train/train.csv")
+df = pd.read_csv("../train/train.csv")
 
 target_col = "NObeyesdad"  
 
@@ -37,13 +37,13 @@ X_num_scaled = scaler.fit_transform(X[num_cols])
 X_cat_encoded = encoder.fit_transform(X[cat_cols])
 
 # Save preprocessing artifacts
-os.makedirs("artifacts/preprocessing", exist_ok=True)
+os.makedirs("../artifacts/preprocessing", exist_ok=True)
 
-joblib.dump(scaler, "artifacts/preprocessing/scaler.pkl")
-joblib.dump(encoder, "artifacts/preprocessing/encoder.pkl")
+joblib.dump(scaler, "../artifacts/preprocessing/scaler.pkl")
+joblib.dump(encoder, "../artifacts/preprocessing/encoder.pkl")
 
 # Save column metadata
-joblib.dump(num_cols.tolist(), "artifacts/preprocessing/num_cols.pkl")
-joblib.dump(cat_cols.tolist(), "artifacts/preprocessing/cat_cols.pkl")
+joblib.dump(num_cols.tolist(), "../artifacts/preprocessing/num_cols.pkl")
+joblib.dump(cat_cols.tolist(), "../artifacts/preprocessing/cat_cols.pkl")
 
 print("Saved scaler, encoder, and column metadata successfully")

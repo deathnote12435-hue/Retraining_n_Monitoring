@@ -16,13 +16,13 @@ from tensorflow.keras.utils import to_categorical
 # =====================
 # CREATE FOLDERS 
 # =====================
-os.makedirs("artifacts/models", exist_ok=True)
-os.makedirs("artifacts/metrics", exist_ok=True)
+os.makedirs("../artifacts/models", exist_ok=True)
+os.makedirs("../artifacts/metrics", exist_ok=True)
 
 # =====================
 # LOAD DATA 
 # =====================
-df = pd.read_csv("data/ObesityDataSet.csv")
+df = pd.read_csv("../data/ObesityDataSet.csv")
 
 # ===========================
 # SPLIT FEATURES AND TARGET 
@@ -44,7 +44,7 @@ label_map = {
     )
 }
 
-with open("artifacts/metrics/label_mapping.json", "w") as f:
+with open("../artifacts/metrics/label_mapping.json", "w") as f:
     json.dump(label_map, f, indent=4)
     
 # ===========================
@@ -117,7 +117,7 @@ loss, accuracy = model.evaluate(X_test, y_test)
 # =============
 # SAVE MODEL
 # =============
-model.save("artifacts/models/model.keras")
+model.save("../artifacts/models/model.keras")
 
 # ========================
 # SAVE TRAINING HISTORY
@@ -137,7 +137,7 @@ evaluation_metrics = {
     "test_accuracy": float(accuracy)
 }
 
-with open("artifacts/metrics/evaluation_metrics.json", "w") as f:
+with open("../artifacts/metrics/evaluation_metrics.json", "w") as f:
     json.dump(evaluation_metrics, f, indent=4)
     
 print("Training complete")

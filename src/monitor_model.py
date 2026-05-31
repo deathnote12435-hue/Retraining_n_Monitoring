@@ -11,7 +11,7 @@ from monitoring_rules import check_model_health
 
 # Logging Setup
 logging.basicConfig(
-    filename='monitoring/logs/model_monitoring.log',
+    filename='../monitoring/logs/model_monitoring.log',
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s'
 )
@@ -20,11 +20,11 @@ logging.info("Initiating MODEL-LEVEL monitoring pipeline.")
 
 # Load Artifacts
 try:
-    X_test = np.load("artifacts/data/X_test.npy")
-    y_test = np.load("artifacts/data/y_test.npy")
-    X_new = np.load("artifacts/data/X_new.npy")
+    X_test = np.load("../artifacts/data/X_test.npy")
+    y_test = np.load("../artifacts/data/y_test.npy")
+    X_new = np.load("../artifacts/data/X_new.npy")
 
-    model = load_model("artifacts/models/model.keras")
+    model = load_model("../artifacts/models/model.keras")
 
     logging.info("Artifacts loaded successfully.")
 
@@ -61,8 +61,8 @@ try:
     old_accuracy = accuracy_score(y_test, y_pred_test)
     old_f1 = f1_score(y_test, y_pred_test, average="weighted")
 
-    if os.path.exists("artifacts/data/y_new.npy"):
-        y_new = np.load("artifacts/data/y_new.npy")
+    if os.path.exists("../artifacts/data/y_new.npy"):
+        y_new = np.load("../artifacts/data/y_new.npy")
         new_accuracy = accuracy_score(y_new, y_pred_new)
         new_f1 = f1_score(y_new, y_pred_new, average="weighted")
     else:
@@ -104,8 +104,8 @@ if retrain_triggered:
     logging.info("Starting internal retraining...")
 
     # Load full dataset
-    df = np.load("artifacts/data/X_train.npy")
-    y_train = np.load("artifacts/data/y_train.npy")
+    df = np.load("../artifacts/data/X_train.npy")
+    y_train = np.load("../artifacts/data/y_train.npy")
 
     input_dim = df.shape[1]
     num_classes = len(np.unique(y_train))
@@ -130,7 +130,7 @@ if retrain_triggered:
 
     # Compare
     if new_test_acc > old_accuracy:
-        new_model.save("artifacts/models/model.keras")
+        new_model.save("../artifacts/models/model.keras")
         logging.info("New model outperformed old model. Model replaced.")
     else:
         logging.info("New model did NOT outperform old model. Keeping existing model.")
@@ -147,9 +147,9 @@ monitoring_output = {
     "retrain_recommended": retrain_triggered
 }
 
-os.makedirs("artifacts/metrics", exist_ok=True)
+os.makedirs("../artifacts/metrics", exist_ok=True)
 
-with open("artifacts/metrics/monitoring_metrics.json", "w") as f:
+with open("../artifacts/metrics/monitoring_metrics.json", "w") as f:
     json.dump(monitoring_output, f, indent=4)
 
 logging.info("monitoring_metrics.json saved.")
@@ -171,7 +171,7 @@ drift_report = {
     }
 }
 
-with open("monitoring/reports/drift_report.json", "w") as f:
+with open("../monitoring/reports/drift_report.json", "w") as f:
     json.dump(drift_report, f, indent=4)
 
 logging.info("drift_report.json saved.")

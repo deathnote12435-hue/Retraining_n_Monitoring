@@ -9,11 +9,11 @@ df = pd.read_csv("data/new_data.csv")
 
 
 # Load preprocessing artifacts
-scaler = joblib.load("artifacts/preprocessing/scaler.pkl")
-encoder = joblib.load("artifacts/preprocessing/encoder.pkl")
+scaler = joblib.load("../artifacts/preprocessing/scaler.pkl")
+encoder = joblib.load("../artifacts/preprocessing/encoder.pkl")
 
-num_cols = joblib.load("artifacts/preprocessing/num_cols.pkl")
-cat_cols = joblib.load("artifacts/preprocessing/cat_cols.pkl")
+num_cols = joblib.load("../artifacts/preprocessing/num_cols.pkl")
+cat_cols = joblib.load("../artifacts/preprocessing/cat_cols.pkl")
 
 
 # Safety check 
@@ -42,9 +42,9 @@ X_new = np.hstack([X_num_scaled, X_cat_encoded])
 
 
 # Save processed output
-os.makedirs("artifacts/data", exist_ok=True)
+os.makedirs("../artifacts/data", exist_ok=True)
 
-np.save("artifacts/data/X_new.npy", X_new)
+np.save("../artifacts/data/X_new.npy", X_new)
 
 print("Preprocessing complete. Saved X_new.npy")
 print("Shape:", X_new.shape)

@@ -6,7 +6,7 @@ from scipy.stats import ks_2samp
 
 # Configure system monitoring logging
 logging.basicConfig(
-    filename='monitoring/logs/drift_detection.log',
+    filename='../monitoring/logs/drift_detection.log',
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s'
 )
@@ -39,8 +39,8 @@ def main():
     logging.info("Initiating automated pipeline data drift inspection.")
     
     # Target files generated upstream by Tyler's preprocessing step
-    X_train = np.load('artifacts/data/X_train.npy')
-    X_new = np.load('artifacts/data/X_new.npy')
+    X_train = np.load('../artifacts/data/X_train.npy')
+    X_new = np.load('../artifacts/data/X_new.npy')
     
     drift_triggered, feature_analysis = check_data_drift(X_train, X_new)
     
@@ -53,8 +53,8 @@ def main():
         "feature_level_metrics": feature_analysis
     }
     
-    os.makedirs('monitoring/reports', exist_ok=True)
-    with open('monitoring/reports/drift_report.json', 'w') as f:
+    os.makedirs('../monitoring/reports', exist_ok=True)
+    with open('../monitoring/reports/drift_report.json', 'w') as f:
         json.dump(drift_report, f, indent=4)
         
     # Standardised tracking metrics file for DVC tracking
@@ -62,8 +62,8 @@ def main():
         "global_drift_status": int(drift_triggered),
         "total_features_checked": len(feature_analysis)
     }
-    os.makedirs('artifacts/metrics', exist_ok=True)
-    with open('artifacts/metrics/monitoring_metrics.json', 'w') as f:
+    os.makedirs('../artifacts/metrics', exist_ok=True)
+    with open('../artifacts/metrics/monitoring_metrics.json', 'w') as f:
         json.dump(monitoring_metrics, f, indent=4)
         
     # Communication interface flag passed directly to the GitHub Runner
