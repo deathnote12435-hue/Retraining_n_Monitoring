@@ -4,6 +4,8 @@ import logging
 import numpy as np
 from scipy.stats import ks_2samp
 
+os.makedirs('../monitoring/logs', exist_ok=True)
+
 # Configure system monitoring logging
 logging.basicConfig(
     filename='../monitoring/logs/drift_detection.log',
