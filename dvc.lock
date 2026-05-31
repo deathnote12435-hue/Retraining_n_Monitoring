@@ -80,3 +80,23 @@ stages:
       hash: md5
       md5: 0729d5433914d722ad5011d944dd1bee
       size: 125616
+  train:
+    cmd: python src/model.py
+    deps:
+    - path: artifacts/data/X_train.npy
+      hash: md5
+      md5: d693c6eebb781c4740908f4bb4051964
+      size: 418752
+    - path: artifacts/data/y_train.npy
+      hash: md5
+      md5: c7f55f37b063e769f51bbbc45dcc020b
+      size: 3810
+    - path: src/model.py
+      hash: md5
+      md5: faf45783ddb97c61be9d0991faa86eca
+      size: 3805
+    outs:
+    - path: artifacts/models/model.keras
+      hash: md5
+      md5: 6f23498ddceba47690faced9dcf2875f
+      size: 77837
