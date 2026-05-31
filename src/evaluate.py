@@ -144,7 +144,7 @@ import os
 
 # Logging setup
 logging.basicConfig(
-    filename="artifacts/logs/evaluation.log",
+    filename="artifacts/metrics/evaluation.log",
     level=logging.INFO,
     format="%(asctime)s - %(levelname)s - %(message)s"
 )
