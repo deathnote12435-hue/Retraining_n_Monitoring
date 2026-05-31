@@ -4,9 +4,9 @@ import joblib
 import os
 
 # Load datasets
-train_df = pd.read_csv("../train/train.csv")
-test_df = pd.read_csv("../test/test.csv")
-new_df = pd.read_csv("../data/new_data.csv")
+train_df = pd.read_csv("train/train.csv")
+test_df = pd.read_csv("test/test.csv")
+new_df = pd.read_csv("data/new_data.csv")
 
 target_col = "NObeyesdad"
 
