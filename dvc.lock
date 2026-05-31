@@ -1,0 +1,22 @@
+schema: '2.0'
+stages:
+  build_preprocessors:
+    cmd: python src/build_preprocessors.py
+    deps:
+    - path: src/build_preprocessors.py
+      hash: md5
+      md5: 848f7416c8927a0987bbc16907d86175
+      size: 1272
+    - path: train/train.csv
+      hash: md5
+      md5: 798a5467f81114f6d8b408122bf50bf8
+      size: 222184
+    outs:
+    - path: artifacts/preprocessing/encoder.pkl
+      hash: md5
+      md5: 70de6f6796a2a47a0620434685d900e5
+      size: 2606
+    - path: artifacts/preprocessing/scaler.pkl
+      hash: md5
+      md5: 73dc1fd11c16adf2700e582846437bc8
+      size: 1079
