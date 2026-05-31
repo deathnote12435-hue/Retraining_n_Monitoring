@@ -60,7 +60,7 @@
 </div>
 
 <script>
-    fetch("../artifacts/metrics/evaluation_full.json")
+    fetch("artifacts/metrics/evaluation_full.json")
         .then(response => response.json())
         .then(data => {
             document.getElementById("timestamp").textContent = data.timestamp;

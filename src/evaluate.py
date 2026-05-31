@@ -218,9 +218,9 @@ evaluation_output = {
     "confusion_matrix": cm
 }
 
-os.makedirs("../artifacts/metrics", exist_ok=True)
+os.makedirs("artifacts/metrics", exist_ok=True)
 
-with open("../artifacts/metrics/evaluation_full.json", "w") as f:
+with open("artifacts/metrics/evaluation_full.json", "w") as f:
     json.dump(evaluation_output, f, indent=4)
 
 logging.info("evaluation_full.json saved successfully.")
