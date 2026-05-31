@@ -62,6 +62,7 @@ def main():
         "global_drift_status": int(drift_triggered),
         "total_features_checked": len(feature_analysis)
     }
+    os.makedirs('artifacts/metrics', exist_ok=True)
     with open('artifacts/metrics/monitoring_metrics.json', 'w') as f:
         json.dump(monitoring_metrics, f, indent=4)
         
